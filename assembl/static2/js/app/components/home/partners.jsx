@@ -11,12 +11,6 @@ class Partners extends React.Component {
       <section className="home-section partners-section">
         <Grid fluid>
           <div className="max-container">
-            <div className="title-section">
-              <div className="title-hyphen">&nbsp;</div>
-              <h1 className="dark-title-1">
-                <Translate value="home.partners" />
-              </h1>
-            </div>
             <div className="content-section">
               <div className="content-margin">
                 {debateData.partners.map((partner, index) => (
