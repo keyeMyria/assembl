@@ -17,6 +17,7 @@ from pyramid.paster import get_appsettings
 from pyramid.path import DottedNameResolver
 from kombu import Exchange, Queue
 from celery import Celery
+from jobtastic import JobtasticTask
 
 from ..lib.sqla import configure_engine
 from ..lib.zmqlib import configure_zmq
@@ -52,6 +53,8 @@ def configure(registry, task_name):
     config_celery_app(translation_celery_app, settings)
     from .imap import imap_celery_app
     config_celery_app(imap_celery_app, settings)
+    from .exports import export_celery_app
+    config_celery_app(export_celery_app, settings)
 
 
 _celery_queues = None
@@ -61,7 +64,8 @@ ASSEMBL_CELERY_APPS = {
     'imap': 'imap_celery_app',
     'notification_dispatch': 'notif_dispatch_celery_app',
     'notify': 'notify_celery_app',
-    'translate': 'translation_celery_app'
+    'translate': 'translation_celery_app',
+    'exports': 'export_celery_app'
 }
 
 
@@ -95,7 +99,9 @@ def config_celery_app(celery_app, settings=None):
         "CELERY_ROUTES": get_celery_routes(),
         "CELERY_TASK_SERIALIZER": 'json',
         "CELERY_ACKS_LATE": True,
-        "CELERY_STORE_ERRORS_EVEN_IF_IGNORED": True}
+        "CELERY_STORE_ERRORS_EVEN_IF_IGNORED": True,
+        "JOBTASTIC_CACHE": settings.get('celery_tasks.broker', '')
+    }
     if settings is not None:
         config['BROKER_URL'] = settings.get(
             '%s.broker' % (celery_app.main,), None
@@ -119,6 +125,11 @@ class CeleryWithConfig(Celery):
         if _settings is None:
             init_from_celery(self)
         self.on_configure_with_settings(_settings)
+
+
+class JobtasticWithConfig(JobtasticTask, CeleryWithConfig):
+    """A Jobtastic task with Assembl based settings"""
+    pass
 
 
 def init_from_celery(celery_app):
@@ -156,3 +167,4 @@ def includeme(config):
     config.include('.notify')
     config.include('.translate')
     config.include('.source_reader')
+    config.include('.exports')
