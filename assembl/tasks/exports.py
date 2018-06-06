@@ -1,8 +1,8 @@
 from time import sleep
-from . import config_celery_app, JobtasticWithConfig
+from . import config_celery_app, CeleryWithConfig
+from jobtastic import JobtasticTask
 
-
-class RandomProgress(JobtasticWithConfig):
+class RandomProgress(JobtasticTask, CeleryWithConfig):
 
     # Must be there
     significant_kwargs = []

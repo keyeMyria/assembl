@@ -17,7 +17,6 @@ from pyramid.paster import get_appsettings
 from pyramid.path import DottedNameResolver
 from kombu import Exchange, Queue
 from celery import Celery
-from jobtastic import JobtasticTask
 
 from ..lib.sqla import configure_engine
 from ..lib.zmqlib import configure_zmq
@@ -99,6 +98,8 @@ def config_celery_app(celery_app, settings=None):
         "CELERY_ROUTES": get_celery_routes(),
         "CELERY_TASK_SERIALIZER": 'json',
         "CELERY_ACKS_LATE": True,
+        "CELERY_CACHE_BACKEND": settings.get('celery_tasks.broker', ''),
+        "CELERY_RESULT_BACKEND": settings.get('celery_tasks.broker', ''),
         "CELERY_STORE_ERRORS_EVEN_IF_IGNORED": True,
         "JOBTASTIC_CACHE": settings.get('celery_tasks.broker', '')
     }
@@ -125,11 +126,6 @@ class CeleryWithConfig(Celery):
         if _settings is None:
             init_from_celery(self)
         self.on_configure_with_settings(_settings)
-
-
-class JobtasticWithConfig(JobtasticTask, CeleryWithConfig):
-    """A Jobtastic task with Assembl based settings"""
-    pass
 
 
 def init_from_celery(celery_app):
