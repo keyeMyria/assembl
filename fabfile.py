@@ -1213,7 +1213,7 @@ def install_builddeps():
         # Requirement for jobtastic
         if not run('xcode-select -p'):
             sudo('xcode-select --install')
-        run('brew install zeromq libtool libmemcached gawk libxmlsec1')
+        run('brew install zeromq rabbitmq libtool libmemcached gawk libxmlsec1')
         if not exists('/usr/local/bin/pkg-config'):
             run('brew install pkg-config')
         if not exists('/usr/local/bin/autoconf'):
